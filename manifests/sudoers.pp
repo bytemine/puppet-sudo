@@ -61,6 +61,12 @@ define sudo::sudoers (
   $tags     = [],
   $defaults = [],
 ) {
+
+  $sudo_group = $::operatingsystem ? {
+    'OpenBSD' => 'wheel',
+    default   => 'root'
+  }
+
   if $name !~ /^[A-Za-z0-9_]+$/ {
     fail 'Name should consist of letters numbers or underscores.'
   }
@@ -68,7 +74,7 @@ define sudo::sudoers (
     file { "/etc/sudoers.d/$name":
       content => template('sudo/sudoers.erb'),
       owner   => 'root',
-      group   => 'root',
+      group   => $sudo_group,
       mode    => '0440',
     }
   }
