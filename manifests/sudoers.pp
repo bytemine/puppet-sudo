@@ -70,6 +70,13 @@ define sudo::sudoers (
   if $name !~ /^[A-Za-z0-9_]+$/ {
     fail 'Name should consist of letters numbers or underscores.'
   }
+
+  exec { "includedir_sudoers_${name}":
+    path    => '/bin:/usr/bin:/sbin:/usr/sbin',
+    command => 'perl -i -pe \'print "\n#\n#includedir /etc/sudoers.d\n#\n" if $. == 8\' /etc/sudoers',
+    unless  => 'cat /etc/sudoers | grep -w \'includedir\'',
+  }
+
   if $ensure == 'present' {
     file { "/etc/sudoers.d/$name":
       content => template('sudo/sudoers.erb'),
